@@ -1,11 +1,36 @@
 import React, { useState } from "react";
-import { Alert, Button, TextInput, View, } from "react-native";
+import { Alert, Button, Keyboard, TextInput, View, } from "react-native";
 import getRealm from "../Components/realm";
+import CryptoJs from 'react-native-crypto-js'
+import { v4 as uuid } from "uuid";
+import "react-native-get-random-values"
+
+
 
 const Login = (props)=>{
     const [user,setUser] = useState("")
-    const [password,setPassword] = useState("")
+    const [senha,setSenha] = useState("")
 
+    //criptografia
+
+    const cryptografar = (senha)=>{
+        const crypt = CryptoJs.AES.encrypt(
+            senha,
+            'secret key 123'
+        ).toString();
+        return crypt
+    }
+
+    const descriptografar = ()=>{
+        const decript = CryptoJs.AES.decrypt (
+            crypt,
+            'secret key 123'
+        )
+
+        const originaltext = decript.toString(CryptoJs.enc.Utf8)
+
+    }
+    //criptografia
 
     const writeTask = async ()=>{
         const realm = await getRealm();
@@ -13,9 +38,9 @@ const Login = (props)=>{
         try{
             realm.write(()=>{
                 realm.create("Users",{
-                    _id:2,
-                    usuario:"valter",
-                    senha:"123",
+                    _id:uuid(),
+                    usuario:user,
+                    senha:cryptografar(senha)
                 });
                 
             })
@@ -55,7 +80,8 @@ const Login = (props)=>{
     const verify = async ()=>{
         const realm = await getRealm();
             try{
-                const u = realm.objects("Users").filtered(`usuario = "${user}" AND senha = "${password}"`)
+                //.sorted pode ser util para organizar algo com preferência.
+                const u = realm.objects("Users").filtered(`usuario = "${user}" AND senha = "${senha}"`)
                 console.log(u)
                 u.length!==0
                 ?
@@ -67,8 +93,9 @@ const Login = (props)=>{
                 console.log(e)
             }finally{
                 realm.close()
-                setPassword("")
+                setSenha("")
                 setUser("")
+                Keyboard.dismiss()//aqui quando é pressionado o botao o teclado se fecha 
             }
     }
 
@@ -84,14 +111,15 @@ const Login = (props)=>{
             <TextInput
                 style={{borderWidth:1,margin:10}}
                 placeholder={"Senha"}
-                value={password}
-                onChangeText={setPassword}
+                value={senha}
+                onChangeText={setSenha}
             />
 
             <Button title="write" onPress={writeTask}/>
             <Button title="get" onPress={getTask}/>
             <Button title="del" onPress={del}/>
             <Button title="go" onPress={verify}/>
+            <Button title="crypto" onPress={cryptografar}/>
 
         </View>
         

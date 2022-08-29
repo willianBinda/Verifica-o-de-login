@@ -1,7 +1,7 @@
 const TaskSchema = {
     name:"Users",
     properties:{
-        _id:"int",
+        _id:"string",
         usuario:"string",
         senha:"string",
     },

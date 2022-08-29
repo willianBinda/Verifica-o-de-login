@@ -3,7 +3,7 @@ import TaskSchema from "./Task";
 
 const getRealm = async ()=>
     await Realm.open({
-        path:"BancoTeste",
+        path:"BancoCryptografado",//BancoTeste
         schema:[TaskSchema],
     });
 
