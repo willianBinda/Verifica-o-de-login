@@ -1,16 +1,18 @@
-import React from "react";
-import { Button, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Alert, Button, TextInput, View, } from "react-native";
 import getRealm from "../Components/realm";
 
 const Login = (props)=>{
-    // console.warn(Object.keys(props.navigation))
-    let firstTask;
+    const [user,setUser] = useState("")
+    const [password,setPassword] = useState("")
+
+
     const writeTask = async ()=>{
         const realm = await getRealm();
 
         try{
             realm.write(()=>{
-                firstTask = realm.create("Users",{
+                realm.create("Users",{
                     _id:1,
                     usuario:"willian",
                     senha:"123",
@@ -19,6 +21,8 @@ const Login = (props)=>{
             })
         }catch(e){
             console.log(e)
+        }finally{
+            realm.close()
         }
     }
 
@@ -30,27 +34,64 @@ const Login = (props)=>{
             console.log(data)
         }catch(e){
             console.log(e)
+        }finally{
+            realm.close()
         }
     }
 
+    const del = async ()=>{
+        const realm = await getRealm();
+        try{
+            realm.write(()=>{
+                realm.deleteAll()
+            })
+        }catch(e){
+            console.log(e)
+        }finally{
+            realm.close()
+        }
+    }
+
+    const verify = async ()=>{
+        const realm = await getRealm();
+            try{
+                const u = realm.objects("Users").filtered(`usuario = "${user}" AND senha = "${password}"`)
+                console.log(u)
+                u.length!==0
+                ?
+                    props.navigation.push("Logado")
+                :
+                    Alert.alert("Usuário ou Senha incorreto!")
+                
+            }catch(e){
+                console.log(e)
+            }finally{
+                realm.close()
+                setPassword("")
+                setUser("")
+            }
+    }
 
     return(
         <View>
-            <Button
-                title="write" onPress={writeTask}
+            
+            <TextInput
+                style={{borderWidth:1,margin:10}}
+                placeholder={"Usuario"}
+                value={user}
+                onChangeText={setUser}
             />
+            <TextInput
+                style={{borderWidth:1,margin:10}}
+                placeholder={"Senha"}
+                value={password}
+                onChangeText={setPassword}
+            />
+
+            <Button title="write" onPress={writeTask}/>
             <Button title="get" onPress={getTask}/>
-            <Button title="go" onPress={async ()=>{
-                const realm = await getRealm();
-                try{
-                    const u = realm.objects("Users").filtered("_id = 1")
-                    if(u[0].usuario ==="willian"){
-                        props.navigation.push("Logado")
-                    }
-                }catch(e){
-                    console.log(e)
-                }
-            }}/>
+            <Button title="del" onPress={del}/>
+            <Button title="go" onPress={verify}/>
         </View>
         
     )
