@@ -13,8 +13,8 @@ const Login = (props)=>{
         try{
             realm.write(()=>{
                 realm.create("Users",{
-                    _id:1,
-                    usuario:"willian",
+                    _id:2,
+                    usuario:"valter",
                     senha:"123",
                 });
                 
@@ -92,6 +92,7 @@ const Login = (props)=>{
             <Button title="get" onPress={getTask}/>
             <Button title="del" onPress={del}/>
             <Button title="go" onPress={verify}/>
+
         </View>
         
     )
