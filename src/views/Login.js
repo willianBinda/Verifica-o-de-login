@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Alert, Button, Keyboard, TextInput, View, } from "react-native";
+import { Alert, Button, Keyboard, TextInput, View, Text } from "react-native";
 import getRealm from "../Components/realm";
 import CryptoJs from 'react-native-crypto-js'
 import { v4 as uuid } from "uuid";
 import "react-native-get-random-values"
+
+
 
 
 
@@ -21,15 +23,16 @@ const Login = (props)=>{
         return crypt
     }
 
-    const descriptografar = ()=>{
+
+    const descriptografar = (criptografado)=>{
         const decript = CryptoJs.AES.decrypt (
-            crypt,
+            criptografado,
             'secret key 123'
         )
-
         const originaltext = decript.toString(CryptoJs.enc.Utf8)
-
+        return originaltext
     }
+
     //criptografia
 
     const writeTask = async ()=>{
@@ -44,6 +47,8 @@ const Login = (props)=>{
                 });
                 
             })
+            setUser("")
+            setSenha("")
         }catch(e){
             console.log(e)
         }finally{
@@ -77,20 +82,27 @@ const Login = (props)=>{
         }
     }
 
+
     const verify = async ()=>{
         const realm = await getRealm();
             try{
-                //.sorted pode ser util para organizar algo com preferência.
-                const u = realm.objects("Users").filtered(`usuario = "${user}" AND senha = "${senha}"`)
+                //
+                const u = realm.objects("Users").filtered(`usuario = "${user}"`)
                 console.log(u)
-                u.length!==0
-                ?
+                const usuarioBanco = u[0].usuario
+                const senhaBanco = u[0].senha
+                const senha_descriptografada = descriptografar(senhaBanco)
+                //
+
+                senha === senha_descriptografada && usuarioBanco === user?
                     props.navigation.push("Logado")
                 :
                     Alert.alert("Usuário ou Senha incorreto!")
-                
+
+                //.sorted pode ser util para organizar algo com preferência.
             }catch(e){
                 console.log(e)
+                Alert.alert("Usuário ou Senha incorreto!")
             }finally{
                 realm.close()
                 setSenha("")
@@ -98,6 +110,9 @@ const Login = (props)=>{
                 Keyboard.dismiss()//aqui quando é pressionado o botao o teclado se fecha 
             }
     }
+
+
+
 
     return(
         <View>
@@ -119,8 +134,10 @@ const Login = (props)=>{
             <Button title="get" onPress={getTask}/>
             <Button title="del" onPress={del}/>
             <Button title="go" onPress={verify}/>
-            <Button title="crypto" onPress={cryptografar}/>
 
+
+            <Text>{user}</Text>
+            <Text>{senha}</Text>
         </View>
         
     )
